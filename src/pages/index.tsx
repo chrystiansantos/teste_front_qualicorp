@@ -64,6 +64,7 @@ const Home: NextPage = () => {
         "2022-01-01",
       ]
     })
+    toast.warning('Acho que a rota de listar os planos por cliente esteja zuada :(')
   }
 
   useEffect(() => {
