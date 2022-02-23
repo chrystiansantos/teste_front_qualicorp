@@ -1,5 +1,14 @@
 import type { NextPage } from 'next'
-import { Box, Button, Container, Flex, FormControl, FormLabel, Image as ImageChackra, Input, Select, Stack } from '@chakra-ui/react'
+import { Box, Button, Container, FormControl, Image as ImageChackra, Input, Select, Stack } from '@chakra-ui/react'
+import {
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+} from '@chakra-ui/react'
+
 import { useEffect, useState } from 'react'
 import { api } from '../service/api'
 import { apiStateCity } from '../service/apiStateCIty'
@@ -51,20 +60,40 @@ const Home: NextPage = () => {
   const [citieList, setCitiesList] = useState<string[]>([]);
   const [worksList, setWorksList] = useState<iResponseWork[]>([]);
   const [entityList, setEntityList] = useState<IResponseEntity[]>([]);
+  const [resultPlans, setResultPlans] = useState<[]>([]);
 
 
-  const submit = () => {
+  const submit = async () => {
+    setLoading(true)
     const entityFind = entityList.find(el => el.RazaoSocial === entity)
-    console.log({
-      entidade: entityFind?.NomeFantasia,
-      uf: state,
-      cidade: city,
-      dataNascimento: [
-        "2021-01-01",
-        "2022-01-01",
-      ]
-    })
-    toast.warning('Acho que a rota de listar os planos por cliente esteja zuada :(')
+    const stateFind = stateList.find(el => el.ESTADO_NOME === state);
+    if (!entityFind || !stateFind || !city) {
+      toast.error('Dados inválidos, preencha corretamente 😀');
+      return
+    }
+    try {
+      const { data } = await api.post('/planos-dinamico/ecommerce/lista?api-key=15ebe59a-e2bb-47b2-8cdf-948ec5e0b44e', {
+        beneficiarios: [1],
+        entidade: entityFind.NomeFantasia,
+        uf: stateFind.ESTADO_SIGLA,
+        cidade: city,
+      })
+      const responseFormated = data.data.map((el: any) => ({
+        id: el.id,
+        operadoraLogo: el.operadoraLogo,
+        plano: el.plano,
+        nivel: el.nivel,
+        abrangencia: el.abrangencia,
+        preco: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(el.precos.total)
+      }))
+      setResultPlans(responseFormated)
+      setLoading(false)
+    } catch (error) {
+      setLoading(false)
+      notify()
+    }
+
+
   }
 
   useEffect(() => {
@@ -169,10 +198,10 @@ const Home: NextPage = () => {
     <Container mt="180" maxWidth="container.lg">
       <ToastContainer />
       <Stack direction={["row"]}>
-        <Box w='30%' h='400px' display="flex" alignItems="center" justifyContent="center" bg='bgColor.100'>
+        <Box w='30%' h='600px' display="flex" alignItems="center" justifyContent="center" bg='bgColor.100'>
           <ImageChackra src="https://www.qualicorp.com.br/wp-content/uploads/2021/08/cropped-Logo_HomeQuali.png"></ImageChackra>
         </Box>
-        <Box w='70%' h='400px' bg='#eee' borderRadius={16}>
+        <Box w='70%' h='600px' bg='#eee' borderRadius={16}>
           <FormControl bgColor="#ddd" m={4} w="47%">
             <Input placeholder='Cep' maxLength={8} value={zipCode} onChange={e => setZipCode(e.target.value)} />
           </FormControl>
@@ -203,16 +232,47 @@ const Home: NextPage = () => {
             </FormControl>
           </Stack>
 
-          <Stack>
+          <Stack mx={4} my={4}>
             <Button colorScheme='blue' rightIcon={<FiSearch />} variant='solid' onClick={submit}>
               Buscar Planos
             </Button>
           </Stack>
-          {loading && (
-            <Stack display="flex" alignItems="center" justifyContent="center" height="100px">
+          <Stack display="flex" alignItems="center" justifyContent="center" height="30px">
+            {loading && (
               <ReactLoading type="bubbles" color={"#212529"} height={60} width={60} />
-            </Stack>
-          )}
+            )}
+          </Stack>
+
+          <Stack mx={4} my={4} overflow="auto" maxH="300">
+            {!loading && resultPlans.length && (
+              <Table variant='simple'>
+                <Thead>
+                  <Tr>
+                    <Th textAlign="center">Plano</Th>
+                    <Th textAlign="center">Nome</Th>
+                    <Th textAlign="center">Nível</Th>
+                    <Th textAlign="center">Abrangencia</Th>
+                    <Th textAlign="center">Preço</Th>
+                  </Tr>
+                </Thead>
+                <Tbody overflow="auto" maxH="200px">
+
+                  {resultPlans.map((el: any) => (
+                    <Tr key={el.id}>
+                      <Td textAlign="center">
+                        <ImageChackra src={el.operadoraLogo} alt='Dan Abramov' borderRadius="12" width="16" height="16" />
+                      </Td>
+                      <Td textAlign="center">{el.plano}</Td>
+                      <Td textAlign="center">{el.nivel}</Td>
+                      <Td textAlign="center">{el.abrangencia}</Td>
+                      <Td textAlign="center">{el.preco}</Td>
+                    </Tr>
+                  ))}
+
+                </Tbody>
+              </Table>
+            )}
+          </Stack>
 
         </Box>
       </Stack >
