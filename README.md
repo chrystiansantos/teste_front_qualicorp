@@ -1,4 +1,5 @@
-Front, desafio Qualicorp 😀
+Front, desafio <a href="https://www.qualicorp.com.br/">Qualicorp</a>
+ 😀
 
 Com o intuito e validar os conhecimentos, solicitaram que desenvolvesse um simples front. Disparando algumas requisicões para uma api definida pelo pessoal da Qualicorp.
 
