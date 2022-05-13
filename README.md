@@ -24,7 +24,7 @@ A seguir iremos executar este outro comando para subir nosso front-end.
 ```
 
 Esse pequeno front foi hospedado utilizando <a href="https://www.netlify.com/">Netlify</a> podendo ser acessado através do seguinte link:
-
-
 <br><br>
 <a href="https://6216670074197b00070b3a1d--nifty-leavitt-6c4090.netlify.app/">Teste Front</a>
+
+![image](https://user-images.githubusercontent.com/33062949/168195670-d42b1802-ed3e-4ced-9a5e-34953187db5d.png)
